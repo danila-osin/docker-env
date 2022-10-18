@@ -1,0 +1,45 @@
+version: '3.7'
+
+networks:
+  app-tier:
+    driver: bridge
+
+services:
+  nats:
+    container_name: nats
+    image: 'bitnami/nats:latest'
+    restart: always
+    volumes:
+      - ./nats/nats.conf:/bitnami/nats/conf/nats-server.conf
+      - ./nats/:/data/
+    ports:
+      - 4222:4222
+      - 8222:8222
+    networks:
+      - app-tier
+
+  redis:
+    container_name: redis
+    image: 'bitnami/redis:latest'
+    environment:
+      - ALLOW_EMPTY_PASSWORD=yes
+    ports:
+      - 6379:6379
+    networks:
+      - app-tier
+
+  postgres:
+    container_name: postgres
+    image: postgres
+    restart: always
+    volumes:
+      - ./pg:/var/lib/postgresql/data
+    environment:
+      - "TZ='Europe/Moscow'"
+      - "PGTZ='Europe/Moscow'"
+      - 'POSTGRES_USER=postgres'
+      - 'POSTGRES_PASSWORD=example'
+    ports:
+      - 5432:5432
+    networks:
+      - app-tier
